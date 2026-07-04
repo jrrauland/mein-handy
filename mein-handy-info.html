@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mein Handy – Info</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:  #2E7D32;
+      --green-light: #E8F5E9;
+      --green-mid: #A5D6A7;
+      --text:   #1A1A1A;
+      --muted:  #555;
+      --white:  #FFFFFF;
+      --radius: 20px;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--green-light);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+
+    header h1 {
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: 900;
+      color: var(--green);
+      line-height: 1.2;
+    }
+
+    header p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 4px 24px rgba(46,125,50,0.10);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--green-light);
+    }
+
+    .info-row:last-child { border-bottom: none; }
+
+    .info-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      width: 36px;
+      text-align: center;
+      margin-top: 2px;
+    }
+
+    .info-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .info-value {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .info-value.unknown {
+      color: #aaa;
+      font-weight: 400;
+      font-style: italic;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--green);
+      color: var(--white);
+      border-radius: 50px;
+      padding: 4px 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .badge.warning {
+      background: #E65100;
+    }
+
+    .tip-box {
+      background: var(--green-light);
+      border-left: 4px solid var(--green-mid);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 4px;
+    }
+
+    .tip-box strong { color: var(--green); }
+
+    footer {
+      margin-top: 12px;
+      font-size: 0.78rem;
+      color: #aaa;
+      text-align: center;
+      max-width: 480px;
+    }
+
+    /* ── AI Assistant ── */
+    .assistant-card { border: 2px solid var(--green-mid); }
+
+    .assistant-card h2 { margin-bottom: 6px; }
+
+    .assistant-subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .suggestion-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .chip {
+      background: var(--green-light);
+      border: 1.5px solid var(--green-mid);
+      color: var(--green);
+      border-radius: 50px;
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: background 0.15s;
+    }
+    .chip:hover, .chip:focus { background: var(--green-mid); outline: none; }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    #ask-input {
+      flex: 1;
+      border: 2px solid var(--green-mid);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 0.95rem;
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+      outline: none;
+      resize: none;
+      min-height: 52px;
+      transition: border-color 0.15s;
+    }
+    #ask-input:focus { border-color: var(--green); }
+
+    #ask-btn {
+      background: var(--green);
+      color: var(--white);
+      border: none;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    #ask-btn:hover { background: #1B5E20; }
+    #ask-btn:disabled { background: var(--green-mid); cursor: not-allowed; }
+
+    #answer-box {
+      margin-top: 18px;
+      display: none;
+    }
+
+    .answer-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+
+    .answer-content {
+      background: var(--green-light);
+      border-left: 4px solid var(--green);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .answer-content.loading {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .answer-content strong { color: var(--green); }
+
+    .step-list {
+      margin: 8px 0 4px 0;
+      padding-left: 0;
+      list-style: none;
+      counter-reset: step-counter;
+    }
+    .step-list li {
+      counter-increment: step-counter;
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+    .step-list li::before {
+      content: counter(step-counter);
+      background: var(--green);
+      color: white;
+      border-radius: 50%;
+      min-width: 24px;
+      height: 24px;
+      font-size: 0.8rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📱</div>
+  <h1>Mein Handy – Info</h1>
+  <p>Informationen über Ihr Smartphone</p>
+</header>
+
+<!-- Main info card -->
+<div class="card">
+  <h2>🔍 Ihr Gerät</h2>
+
+  <div class="info-row">
+    <div class="info-icon">🏭</div>
+    <div>
+      <div class="info-label">Hersteller</div>
+      <div class="info-value" id="val-maker">…</div>
+    </div>
+  </div>
+
+  <div class="info-row">
+    <div class="info-icon">📲</div>
+    <div>
+      <div class="info-label">Modell</div>
+      <div class="info-value" id="val-model">…</div>
+    </div>
+  </div>
+
+  <div class="info-row">
+    <div class="info-icon">🤖</div>
+    <div>
+      <div class="info-label">Android-Version</div>
+      <div id="val-android">…</div>
+    </div>
+  </div>
+
+  <div class="info-row">
+    <div class="info-icon">🌐</div>
+    <div>
+      <div class="info-label">Browser</div>
+      <div class="info-value" id="val-browser">…</div>
+    </div>
+  </div>
+</div>
+
+<!-- Update tip card -->
+<div class="card" id="update-card" style="display:none;">
+  <h2>💡 Hinweis</h2>
+  <div class="tip-box" id="update-tip"></div>
+</div>
+
+<!-- Explanation card -->
+<div class="card">
+  <h2>ℹ️ Was bedeutet das?</h2>
+  <div class="tip-box">
+    <strong>Hersteller</strong> ist die Firma, die Ihr Handy gebaut hat – z. B. Samsung, Huawei oder Sony.<br><br>
+    <strong>Modell</strong> ist der genaue Name Ihres Handys – hilfreich beim Kauf von Zubehör oder bei der Suche nach Hilfe.<br><br>
+    <strong>Android-Version</strong> zeigt, wie aktuell Ihr Betriebssystem ist. Neuere Versionen sind sicherer.
+  </div>
+</div>
+
+<!-- AI Assistant card -->
+<div class="card assistant-card">
+  <h2>🤖 Hilfe-Assistent</h2>
+  <p class="assistant-subtitle">Stellen Sie eine Frage zu Ihrem Handy – z.&nbsp;B. wie Sie eine Einstellung finden.</p>
+
+  <div class="suggestion-chips">
+    <button class="chip" onclick="askQuestion(this.textContent)">📶 WLAN verbinden</button>
+    <button class="chip" onclick="askQuestion(this.textContent)">🔋 Akku sparen</button>
+    <button class="chip" onclick="askQuestion(this.textContent)">📸 Screenshot machen</button>
+    <button class="chip" onclick="askQuestion(this.textContent)">🔊 Lautstärke einstellen</button>
+    <button class="chip" onclick="askQuestion(this.textContent)">🔒 Display sperren</button>
+    <button class="chip" onclick="askQuestion(this.textContent)">📍 GPS / Standort</button>
+    <button class="chip" onclick="askQuestion(this.textContent)">🌐 Mobilfunkdaten</button>
+    <button class="chip" onclick="askQuestion(this.textContent)">📲 App installieren</button>
+  </div>
+
+  <div class="input-row">
+    <textarea id="ask-input" placeholder="Ihre Frage eingeben …" rows="2"></textarea>
+    <button id="ask-btn" onclick="askQuestion()" title="Frage stellen">➤</button>
+  </div>
+
+  <div id="answer-box">
+    <div class="answer-label">💬 Antwort</div>
+    <div class="answer-content" id="answer-content"></div>
+  </div>
+</div>
+
+<footer>
+  Diese Seite speichert keine Daten. Alle Informationen bleiben auf Ihrem Gerät.
+</footer>
+
+<script>
+  // Initialise global device context early so all code can write to it safely
+  window._deviceContext = { maker: null, model: null, android: null };
+
+(function () {
+  const ua = navigator.userAgent;
+
+  // ── Android version ──────────────────────────────────────────────
+  function getAndroidVersion() {
+    const m = ua.match(/Android\s+([\d.]+)/i);
+    return m ? m[1] : null;
+  }
+
+  // ── Maker + Model from user agent ────────────────────────────────
+  // Typical pattern: (Linux; Android X.X; MAKER MODEL Build/...)
+  function getMakerModel() {
+    const m = ua.match(/\(Linux;[^)]*Android[^;]*;\s*([^)]+?)\s*(?:Build\/[^)]*)?[;)]/i);
+    if (!m) return { maker: null, model: null };
+
+    const raw = m[1].trim();
+    // Some devices: "Samsung SM-G991B", "Huawei P30 Pro", etc.
+    const parts = raw.split(/\s+/);
+    if (parts.length === 0) return { maker: null, model: null };
+
+    // Try to tidy up well-known prefixes
+    const knownMakers = [
+      'samsung','huawei','xiaomi','oppo','vivo','realme','motorola',
+      'nokia','sony','lg','oneplus','google','honor','asus','lenovo',
+      'htc','blackberry','fairphone','wiko','tcl','alcatel','zte',
+    ];
+    const first = parts[0].toLowerCase();
+    const isKnown = knownMakers.some(k => first.includes(k));
+
+    let maker, model;
+    if (isKnown) {
+      maker = parts[0];
+      model = parts.slice(1).join(' ') || raw;
+    } else {
+      maker = null;
+      model = raw;
+    }
+    return { maker, model };
+  }
+
+  // ── Browser name ──────────────────────────────────────────────────
+  function getBrowser() {
+    if (/EdgA/i.test(ua)) return 'Microsoft Edge';
+    if (/OPR|OPT/i.test(ua)) return 'Opera';
+    if (/Firefox/i.test(ua)) return 'Firefox';
+    if (/SamsungBrowser/i.test(ua)) return 'Samsung Internet';
+    if (/Chrome/i.test(ua)) return 'Google Chrome';
+    if (/Safari/i.test(ua)) return 'Safari';
+    return 'Unbekannter Browser';
+  }
+
+  // ── Device model lookup table ─────────────────────────────────────
+  // Maps user-agent model codes → friendly marketing names
+  const deviceNames = {
+    // ── Samsung Galaxy S series ───────────────────────────────────
+    'SM-S928B':'Samsung Galaxy S24 Ultra','SM-S926B':'Samsung Galaxy S24+','SM-S921B':'Samsung Galaxy S24',
+    'SM-S918B':'Samsung Galaxy S23 Ultra','SM-S916B':'Samsung Galaxy S23+','SM-S911B':'Samsung Galaxy S23',
+    'SM-S908B':'Samsung Galaxy S22 Ultra','SM-S906B':'Samsung Galaxy S22+','SM-S901B':'Samsung Galaxy S22',
+    'SM-G998B':'Samsung Galaxy S21 Ultra','SM-G996B':'Samsung Galaxy S21+','SM-G991B':'Samsung Galaxy S21',
+    'SM-G988B':'Samsung Galaxy S20 Ultra','SM-G986B':'Samsung Galaxy S20+','SM-G981B':'Samsung Galaxy S20',
+    'SM-G975F':'Samsung Galaxy S10+','SM-G973F':'Samsung Galaxy S10','SM-G970F':'Samsung Galaxy S10e',
+    'SM-G965F':'Samsung Galaxy S9+','SM-G960F':'Samsung Galaxy S9',
+    'SM-G955F':'Samsung Galaxy S8+','SM-G950F':'Samsung Galaxy S8',
+    // ── Samsung Galaxy A series ───────────────────────────────────
+    'SM-A556B':'Samsung Galaxy A55','SM-A546B':'Samsung Galaxy A54',
+    'SM-A536B':'Samsung Galaxy A53','SM-A525F':'Samsung Galaxy A52',
+    'SM-A515F':'Samsung Galaxy A51','SM-A505F':'Samsung Galaxy A50',
+    'SM-A336B':'Samsung Galaxy A33','SM-A325F':'Samsung Galaxy A32',
+    'SM-A235F':'Samsung Galaxy A23','SM-A225F':'Samsung Galaxy A22',
+    'SM-A135F':'Samsung Galaxy A13','SM-A125F':'Samsung Galaxy A12',
+    'SM-A047F':'Samsung Galaxy A04s','SM-A037F':'Samsung Galaxy A03s',
+    'SM-A736B':'Samsung Galaxy A73','SM-A726B':'Samsung Galaxy A72',
+    'SM-A715F':'Samsung Galaxy A71','SM-A705F':'Samsung Galaxy A70',
+    // ── Samsung Galaxy Note ───────────────────────────────────────
+    'SM-N986B':'Samsung Galaxy Note 20 Ultra','SM-N981B':'Samsung Galaxy Note 20',
+    'SM-N975F':'Samsung Galaxy Note 10+','SM-N970F':'Samsung Galaxy Note 10',
+    'SM-N960F':'Samsung Galaxy Note 9','SM-N950F':'Samsung Galaxy Note 8',
+    // ── Samsung Galaxy Z (foldables) ──────────────────────────────
+    'SM-F946B':'Samsung Galaxy Z Fold5','SM-F936B':'Samsung Galaxy Z Fold4',
+    'SM-F926B':'Samsung Galaxy Z Fold3','SM-F916B':'Samsung Galaxy Z Fold2',
+    'SM-F731B':'Samsung Galaxy Z Flip5','SM-F721B':'Samsung Galaxy Z Flip4',
+    'SM-F711B':'Samsung Galaxy Z Flip3','SM-F700F':'Samsung Galaxy Z Flip',
+    // ── Samsung Galaxy Tab ────────────────────────────────────────
+    'SM-X910':'Samsung Galaxy Tab S9 Ultra','SM-X716B':'Samsung Galaxy Tab S9 FE',
+    'SM-T870':'Samsung Galaxy Tab S7','SM-T976B':'Samsung Galaxy Tab S7+',
+    'SM-T500':'Samsung Galaxy Tab A7','SM-T220':'Samsung Galaxy Tab A7 Lite',
+    // ── Google Pixel ──────────────────────────────────────────────
+    'Pixel 9 Pro XL':'Google Pixel 9 Pro XL','Pixel 9 Pro':'Google Pixel 9 Pro',
+    'Pixel 9':'Google Pixel 9','Pixel 8 Pro':'Google Pixel 8 Pro',
+    'Pixel 8':'Google Pixel 8','Pixel 7 Pro':'Google Pixel 7 Pro',
+    'Pixel 7':'Google Pixel 7','Pixel 6 Pro':'Google Pixel 6 Pro',
+    'Pixel 6':'Google Pixel 6','Pixel 6a':'Google Pixel 6a',
+    'Pixel 5':'Google Pixel 5','Pixel 4a':'Google Pixel 4a',
+    'Pixel 4 XL':'Google Pixel 4 XL','Pixel 4':'Google Pixel 4',
+    'Pixel 3a XL':'Google Pixel 3a XL','Pixel 3a':'Google Pixel 3a',
+    // ── Huawei ────────────────────────────────────────────────────
+    'VOG-L29':'Huawei P30 Pro','ELE-L29':'Huawei P30',
+    'CLT-L29':'Huawei P20 Pro','EML-L29':'Huawei P20',
+    'ANA-NX9':'Huawei P40 Pro','ANA-LX4':'Huawei P40',
+    'NOH-NX9':'Huawei P40 Pro+',
+    'KRIN-AN00':'Huawei Nova 9','NAM-LX9':'Huawei Nova 8 Pro',
+    'JSN-L21':'Huawei P Smart 2019',
+    'STK-LX1':'Huawei P Smart 2019 (STK)',
+    'PCT-L29':'Huawei P40 Lite','MAR-LX1B':'Huawei P30 Lite',
+    // ── Honor ─────────────────────────────────────────────────────
+    'CRT-NX1':'Honor Magic5 Pro','ANY-NX1':'Honor Magic4 Pro',
+    'NTH-NX9':'Honor 50','VNE-L23':'Honor X8',
+    // ── Xiaomi ────────────────────────────────────────────────────
+    '2311DRK48G':'Xiaomi 14 Pro','23116PN5BC':'Xiaomi 14',
+    '2210132G':'Xiaomi 13 Pro','2210132C':'Xiaomi 13',
+    '2201122G':'Xiaomi 12 Pro','2201123G':'Xiaomi 12',
+    'M2012K11G':'Xiaomi Mi 11','M2007J3SG':'Xiaomi Mi 10T Pro',
+    'M2007J17G':'Xiaomi Mi 10T','M2004J19G':'Xiaomi Mi 10 Lite',
+    // ── Xiaomi Redmi ──────────────────────────────────────────────
+    '23049PCD8G':'Redmi Note 13 Pro+','2312DRAABL':'Redmi Note 13 Pro',
+    '23021RAAEG':'Redmi Note 12 Pro+','22101316G':'Redmi Note 12',
+    '21091116AG':'Redmi Note 11 Pro','M2101K7BG':'Redmi Note 10 Pro',
+    'M2101K7BNY':'Redmi Note 10','M2003J15SC':'Redmi Note 9 Pro',
+    'M2010J19SG':'Redmi Note 9T','M2004J19C':'Redmi Note 9',
+    // ── Xiaomi POCO ───────────────────────────────────────────────
+    '23013PC75G':'POCO X6 Pro','22101320G':'POCO X5 Pro',
+    'M2102J20SG':'POCO X3 Pro','M2007J20CG':'POCO X3',
+    'M2012M11AG':'POCO M3 Pro','21061110AG':'POCO F3',
+    // ── OPPO ──────────────────────────────────────────────────────
+    'CPH2449':'OPPO Find X6 Pro','CPH2413':'OPPO Reno10 Pro+',
+    'CPH2387':'OPPO Reno8 Pro','CPH2251':'OPPO Find X3 Pro',
+    'CPH2173':'OPPO A94','CPH2069':'OPPO A53',
+    // ── Motorola ──────────────────────────────────────────────────
+    'XT2301-4':'Motorola Edge 40 Pro','XT2251-1':'Motorola Edge 30 Pro',
+    'XT2153-1':'Motorola Edge 20 Pro','XT2075-2':'Motorola Edge 20',
+    'XT2125-4':'Motorola Moto G100','XT2093-3':'Motorola Moto G50',
+    'XT2043-4':'Motorola Moto G 5G','XT2053-2':'Motorola Moto G8 Power',
+    'XT1965-3':'Motorola Moto G7 Power','XT1955-4':'Motorola Moto G8 Play',
+    // ── Nokia ─────────────────────────────────────────────────────
+    'TA-1347':'Nokia G60 5G','TA-1338':'Nokia G21',
+    'TA-1332':'Nokia G20','TA-1268':'Nokia 5.4',
+    'TA-1263':'Nokia 3.4','TA-1233':'Nokia 2.4',
+    // ── Sony Xperia ───────────────────────────────────────────────
+    'XQ-BE72':'Sony Xperia 1 V','XQ-DE72':'Sony Xperia 5 V',
+    'XQ-BT52':'Sony Xperia 1 IV','XQ-CT54':'Sony Xperia 5 IV',
+    'XQ-BC72':'Sony Xperia 1 III','XQ-BT52':'Sony Xperia 5 III',
+    // ── OnePlus ───────────────────────────────────────────────────
+    'CPH2449':'OnePlus 11','CPH2423':'OnePlus 10 Pro',
+    'CPH2387':'OnePlus 10T','LE2123':'OnePlus 9 Pro',
+    'LE2113':'OnePlus 9','IN2023':'OnePlus 8 Pro',
+    // ── Fairphone ─────────────────────────────────────────────────
+    'FP5':'Fairphone 5','FP4':'Fairphone 4','FP3':'Fairphone 3',
+    // ── Realme ────────────────────────────────────────────────────
+    'RMX3686':'Realme GT3','RMX3563':'Realme 10 Pro+',
+    'RMX3471':'Realme 9 Pro+','RMX3085':'Realme 8 Pro',
+    // ── Vivo ──────────────────────────────────────────────────────
+    'V2254A':'Vivo X90 Pro','V2145':'Vivo X80 Pro',
+    'V2031':'Vivo Y52s','V2026':'Vivo Y20',
+  };
+
+  function lookupModel(rawModel) {
+    if (!rawModel) return null;
+    const key = rawModel.trim().toUpperCase();
+    // Direct match (case-insensitive)
+    for (const [code, name] of Object.entries(deviceNames)) {
+      if (code.toUpperCase() === key) return name;
+    }
+    // Partial match: code appears somewhere in the raw string
+    for (const [code, name] of Object.entries(deviceNames)) {
+      if (key.includes(code.toUpperCase())) return name;
+    }
+    return null;
+  }
+
+  // ── Android version name mapping ──────────────────────────────────
+  const androidNames = {
+    '15': 'Android 15', '14': 'Android 14', '13': 'Android 13',
+    '12': 'Android 12', '11': 'Android 11', '10': 'Android 10',
+    '9':  'Android 9 (Pie)', '8': 'Android 8 (Oreo)',
+    '7':  'Android 7 (Nougat)', '6': 'Android 6 (Marshmallow)',
+  };
+
+  // ── Render ────────────────────────────────────────────────────────
+  const androidVer = getAndroidVersion();
+  const { maker, model } = getMakerModel();
+  const browser = getBrowser();
+
+  function setText(id, text, fallback) {
+    const el = document.getElementById(id);
+    if (text) {
+      el.textContent = text;
+    } else {
+      el.textContent = fallback || 'Nicht erkannt';
+      el.classList.add('unknown');
+    }
+  }
+
+  // Try to resolve friendly model name
+  const rawModel = model;
+  const friendlyModel = lookupModel(rawModel);
+
+  // Maker: if lookup found a name, extract maker from it
+  let displayMaker = maker;
+  if (!displayMaker && friendlyModel) {
+    const knownBrands = ['Samsung','Google','Huawei','Honor','Xiaomi','Redmi','POCO',
+      'OPPO','Motorola','Nokia','Sony','OnePlus','Fairphone','Realme','Vivo'];
+    for (const b of knownBrands) {
+      if (friendlyModel.startsWith(b)) { displayMaker = b; break; }
+    }
+  }
+  setText('val-maker', displayMaker, 'Nicht erkannt');
+  window._deviceContext.maker = displayMaker || null;
+
+  // Model: show friendly name + raw code below it
+  const modelEl = document.getElementById('val-model');
+  if (friendlyModel) {
+    modelEl.innerHTML = `<span class="info-value">${friendlyModel}</span>` +
+      (rawModel && rawModel.toUpperCase() !== friendlyModel.toUpperCase()
+        ? `<br><span style="font-size:0.78rem;color:#aaa;font-weight:400;">${rawModel}</span>`
+        : '');
+    window._deviceContext.model = friendlyModel;
+  } else if (rawModel) {
+    modelEl.textContent = rawModel;
+    modelEl.classList.add('info-value');
+    window._deviceContext.model = rawModel;
+  } else {
+    modelEl.textContent = 'Nicht erkannt';
+    modelEl.classList.add('unknown');
+  }
+
+  setText('val-browser', browser);
+
+  // Android version with badge
+  const androidEl = document.getElementById('val-android');
+  if (androidVer) {
+    const major = androidVer.split('.')[0];
+    const name = androidNames[major] || 'Android ' + androidVer;
+    const badge = document.createElement('span');
+    badge.className = 'badge' + (parseInt(major) < 10 ? ' warning' : '');
+    badge.textContent = name;
+    androidEl.appendChild(badge);
+    window._deviceContext.android = name;
+
+    // Show update tip
+    const tipCard = document.getElementById('update-card');
+    const tip = document.getElementById('update-tip');
+    tipCard.style.display = 'block';
+    if (parseInt(major) >= 13) {
+      tip.innerHTML = '✅ Ihr Android ist <strong>aktuell und sicher</strong>. Gut gemacht!';
+    } else if (parseInt(major) >= 10) {
+      tip.innerHTML = '⚠️ Ihre Android-Version ist etwas älter. Prüfen Sie unter <strong>Einstellungen → System → Software-Update</strong>, ob ein Update verfügbar ist.';
+    } else {
+      tip.innerHTML = '🔴 Ihre Android-Version ist <strong>sehr alt</strong> und erhält möglicherweise keine Sicherheitsupdates mehr. Sprechen Sie mit jemandem, der Ihnen beim Umstieg auf ein neueres Gerät helfen kann.';
+    }
+  } else {
+    const noAndroid = document.createElement('span');
+    noAndroid.className = 'info-value unknown';
+    noAndroid.textContent = 'Kein Android erkannt (evtl. iOS oder PC)';
+    androidEl.appendChild(noAndroid);
+  }
+  // ── AI Assistant ──────────────────────────────────────────────────
+  window.askQuestion = async function askQuestion(chipText) {
+    const input = document.getElementById('ask-input');
+    const btn   = document.getElementById('ask-btn');
+    const box   = document.getElementById('answer-box');
+    const content = document.getElementById('answer-content');
+
+    const question = chipText || input.value.trim();
+    if (!question) { input.focus(); return; }
+
+    // Fill input if triggered by chip
+    if (chipText) input.value = chipText;
+
+    // Show loading state
+    btn.disabled = true;
+    box.style.display = 'block';
+    content.className = 'answer-content loading';
+    content.textContent = 'Einen Moment bitte …';
+
+    // Build device context string for the prompt
+    const ctx = window._deviceContext;
+    const deviceStr = [
+      ctx.maker  ? `Hersteller: ${ctx.maker}` : null,
+      ctx.model  ? `Modell: ${ctx.model}`      : null,
+      ctx.android? `Android-Version: ${ctx.android}` : null,
+    ].filter(Boolean).join(', ');
+
+    const systemPrompt = `Du bist ein freundlicher Smartphone-Hilfsassistent für ältere Erwachsene und Anfänger in Deutschland.
+Du antwortest IMMER auf Deutsch, in einfacher, klarer Sprache ohne Fachbegriffe.
+Erkläre Schritte so, als würdest du mit jemandem sprechen, der zum ersten Mal ein Smartphone benutzt.
+Benutze nummerierte Schritte wenn du einen Weg durch Menüs erklärst.
+Halte Antworten kurz – maximal 6 Schritte. Verwende gelegentlich passende Emojis.
+${deviceStr ? `Das Gerät des Nutzers: ${deviceStr}.` : ''}
+Passe deine Antwort an das spezifische Gerät an, wenn du es kennst (z.B. Samsung One UI, Huawei EMUI haben eigene Menünamen).
+Wichtige Hinweise für genaue Antworten:
+- Google Play Store: Wenn man den Play Store öffnet, gibt es KEIN sichtbares Suchfeld oben. Man muss zuerst unten auf das Lupen-Symbol 🔍 tippen, dann erscheint oben ein Suchfeld zum Eintippen.
+- Google Play Store Suchergebnisse: Wichtiger Hinweis für Anfänger – die ersten Ergebnisse in der Liste sind oft Werbung (erkennbar am kleinen Wort "Gesponsert" oder "Anzeige" darunter) und nicht unbedingt die gesuchte App. Man sollte immer etwas nach unten scrollen und den genauen App-Namen sowie das offizielle Symbol prüfen, bevor man auf "Installieren" tippt.
+- Einstellungen: Immer mit dem Zahnrad-Symbol erkennbar.
+- Beschreibe Symbole und Farben wenn möglich (z.B. "das bunte Dreieck-Symbol" für Play Store).
+Antworte NUR auf Fragen zu Smartphone-Bedienung und Einstellungen. Bei anderen Themen bitte freundlich ablehnen.`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: question }],
+        }),
+      });
+
+      const data = await response.json();
+      const text = data?.content?.[0]?.text || 'Keine Antwort erhalten.';
+
+      // Render: convert numbered lines to styled list, bold **text**
+      content.className = 'answer-content';
+      content.innerHTML = formatAnswer(text);
+
+    } catch (err) {
+      content.className = 'answer-content';
+      content.innerHTML = '⚠️ Verbindung fehlgeschlagen. Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.';
+    }
+
+    btn.disabled = false;
+  }
+
+  function formatAnswer(text) {
+    // Bold **text**
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Convert numbered steps (1. 2. etc.) into list items
+    const lines = text.split('\n');
+    let html = '';
+    let listItems = [];
+    let inList = false;
+
+    function flushList() {
+      if (listItems.length > 0) {
+        html += '<ol class="step-list">';
+        listItems.forEach(item => { html += `<li>${item}</li>`; });
+        html += '</ol>';
+        listItems = [];
+      }
+      inList = false;
+    }
+
+    for (const line of lines) {
+      const stepMatch = line.match(/^\s*\d+[.)]\s+(.+)/);
+      if (stepMatch) {
+        inList = true;
+        listItems.push(stepMatch[1]);
+      } else {
+        if (inList) flushList();
+        if (line.trim()) html += `<p style="margin-bottom:6px">${line}</p>`;
+      }
+    }
+    if (inList) flushList();
+    return html;
+  }
+
+  // Allow Enter key to submit (Shift+Enter = newline)
+  document.getElementById('ask-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askQuestion(); }
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -561,11 +561,7 @@
     '7':  'Android 7 (Nougat)', '6': 'Android 6 (Marshmallow)',
   };
 
-  // ── Render ────────────────────────────────────────────────────────
-  const androidVer = getAndroidVersion();
-  const { maker, model } = getMakerModel();
-  const browser = getBrowser();
-
+  // ── Helpers ───────────────────────────────────────────────────────
   function setText(id, text, fallback) {
     const el = document.getElementById(id);
     if (text) {
@@ -576,40 +572,64 @@
     }
   }
 
-  // Try to resolve friendly model name
-  const rawModel = model;
-  const friendlyModel = lookupModel(rawModel);
+  function renderMakerModel(rawMaker, rawModel) {
+    const friendlyModel = lookupModel(rawModel) || (rawModel !== 'K' ? rawModel : null);
 
-  // Maker: if lookup found a name, extract maker from it
-  let displayMaker = maker;
-  if (!displayMaker && friendlyModel) {
-    const knownBrands = ['Samsung','Google','Huawei','Honor','Xiaomi','Redmi','POCO',
-      'OPPO','Motorola','Nokia','Sony','OnePlus','Fairphone','Realme','Vivo'];
-    for (const b of knownBrands) {
-      if (friendlyModel.startsWith(b)) { displayMaker = b; break; }
+    // Derive maker from friendly name if not already known
+    let displayMaker = rawMaker;
+    if (!displayMaker && friendlyModel) {
+      const knownBrands = ['Samsung','Google','Huawei','Honor','Xiaomi','Redmi','POCO',
+        'OPPO','Motorola','Nokia','Sony','OnePlus','Fairphone','Realme','Vivo'];
+      for (const b of knownBrands) {
+        if (friendlyModel.startsWith(b)) { displayMaker = b; break; }
+      }
+    }
+    setText('val-maker', displayMaker, 'Nicht erkannt');
+    window._deviceContext.maker = displayMaker || null;
+
+    const modelEl = document.getElementById('val-model');
+    if (friendlyModel) {
+      const showCode = rawModel && rawModel !== 'K' &&
+        rawModel.toUpperCase() !== friendlyModel.toUpperCase();
+      modelEl.innerHTML = `<span class="info-value">${friendlyModel}</span>` +
+        (showCode ? `<br><span style="font-size:0.78rem;color:#aaa;font-weight:400;">${rawModel}</span>` : '');
+      window._deviceContext.model = friendlyModel;
+    } else if (rawModel && rawModel !== 'K') {
+      modelEl.textContent = rawModel;
+      modelEl.classList.add('info-value');
+      window._deviceContext.model = rawModel;
+    } else {
+      modelEl.textContent = 'Nicht erkannt';
+      modelEl.classList.add('unknown');
     }
   }
-  setText('val-maker', displayMaker, 'Nicht erkannt');
-  window._deviceContext.maker = displayMaker || null;
 
-  // Model: show friendly name + raw code below it
-  const modelEl = document.getElementById('val-model');
-  if (friendlyModel) {
-    modelEl.innerHTML = `<span class="info-value">${friendlyModel}</span>` +
-      (rawModel && rawModel.toUpperCase() !== friendlyModel.toUpperCase()
-        ? `<br><span style="font-size:0.78rem;color:#aaa;font-weight:400;">${rawModel}</span>`
-        : '');
-    window._deviceContext.model = friendlyModel;
-  } else if (rawModel) {
-    modelEl.textContent = rawModel;
-    modelEl.classList.add('info-value');
-    window._deviceContext.model = rawModel;
+  // ── Render ────────────────────────────────────────────────────────
+  const browser = getBrowser();
+  setText('val-browser', browser);
+
+  // Try modern Client Hints API first (Chrome 90+ on Android)
+  // This bypasses the privacy-reduced UA string that reports "K" as model
+  if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+    navigator.userAgentData.getHighEntropyValues(['manufacturer','model','platformVersion'])
+      .then(hints => {
+        const hintModel  = hints.model        || null;
+        const hintMaker  = hints.manufacturer  || null;
+        const { maker: uaMaker, model: uaModel } = getMakerModel();
+        renderMakerModel(hintMaker || uaMaker, hintModel || uaModel);
+      })
+      .catch(() => {
+        // Client Hints failed — fall back to UA string
+        const { maker, model } = getMakerModel();
+        renderMakerModel(maker, model);
+      });
   } else {
-    modelEl.textContent = 'Nicht erkannt';
-    modelEl.classList.add('unknown');
+    // Older browser — use UA string only
+    const { maker, model } = getMakerModel();
+    renderMakerModel(maker, model);
   }
 
-  setText('val-browser', browser);
+  const androidVer = getAndroidVersion();
 
   // Android version with badge
   const androidEl = document.getElementById('val-android');

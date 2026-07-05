@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
@@ -402,13 +401,17 @@
     const knownMakers = [
       'samsung','huawei','xiaomi','oppo','vivo','realme','motorola',
       'nokia','sony','lg','oneplus','google','honor','asus','lenovo',
-      'htc','blackberry','fairphone','wiko','tcl','alcatel','zte',
+      'htc','blackberry','fairphone','wiko','tcl','alcatel','zte','pixel',
     ];
     const first = parts[0].toLowerCase();
     const isKnown = knownMakers.some(k => first.includes(k));
 
     let maker, model;
-    if (isKnown) {
+    if (first === 'pixel') {
+      // Google reports "Pixel 8a" not "Google Pixel 8a" in UA string
+      maker = 'Google';
+      model = parts.join(' ');
+    } else if (isKnown) {
       maker = parts[0];
       model = parts.slice(1).join(' ') || raw;
     } else {
@@ -465,12 +468,15 @@
     'SM-T870':'Samsung Galaxy Tab S7','SM-T976B':'Samsung Galaxy Tab S7+',
     'SM-T500':'Samsung Galaxy Tab A7','SM-T220':'Samsung Galaxy Tab A7 Lite',
     // ── Google Pixel ──────────────────────────────────────────────
-    'Pixel 9 Pro XL':'Google Pixel 9 Pro XL','Pixel 9 Pro':'Google Pixel 9 Pro',
+    'Pixel 9 Pro XL':'Google Pixel 9 Pro XL','Pixel 9 Pro Fold':'Google Pixel 9 Pro Fold',
+    'Pixel 9 Pro':'Google Pixel 9 Pro','Pixel 9a':'Google Pixel 9a',
     'Pixel 9':'Google Pixel 9','Pixel 8 Pro':'Google Pixel 8 Pro',
-    'Pixel 8':'Google Pixel 8','Pixel 7 Pro':'Google Pixel 7 Pro',
+    'Pixel 8a':'Google Pixel 8a','Pixel 8':'Google Pixel 8',
+    'Pixel 7 Pro':'Google Pixel 7 Pro','Pixel 7a':'Google Pixel 7a',
     'Pixel 7':'Google Pixel 7','Pixel 6 Pro':'Google Pixel 6 Pro',
-    'Pixel 6':'Google Pixel 6','Pixel 6a':'Google Pixel 6a',
-    'Pixel 5':'Google Pixel 5','Pixel 4a':'Google Pixel 4a',
+    'Pixel 6a':'Google Pixel 6a','Pixel 6':'Google Pixel 6',
+    'Pixel 5a':'Google Pixel 5a','Pixel 5':'Google Pixel 5',
+    'Pixel 4a (5G)':'Google Pixel 4a (5G)','Pixel 4a':'Google Pixel 4a',
     'Pixel 4 XL':'Google Pixel 4 XL','Pixel 4':'Google Pixel 4',
     'Pixel 3a XL':'Google Pixel 3a XL','Pixel 3a':'Google Pixel 3a',
     // ── Huawei ────────────────────────────────────────────────────

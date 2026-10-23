@@ -537,8 +537,9 @@
 
   // ── Android version name mapping ──────────────────────────────────
   const androidNames = {
-    '15': 'Android 15', '14': 'Android 14', '13': 'Android 13',
-    '12': 'Android 12', '11': 'Android 11', '10': 'Android 10',
+    '17': 'Android 17', '16': 'Android 16', '15': 'Android 15',
+    '14': 'Android 14', '13': 'Android 13', '12': 'Android 12',
+    '11': 'Android 11', '10': 'Android 10',
     '9':  'Android 9 (Pie)', '8': 'Android 8 (Oreo)',
     '7':  'Android 7 (Nougat)', '6': 'Android 6 (Marshmallow)',
   };
@@ -590,56 +591,59 @@
   const browser = getBrowser();
   setText('val-browser', browser);
 
-  // Try modern Client Hints API first (Chrome 90+ on Android)
-  // This bypasses the privacy-reduced UA string that reports "K" as model
-  if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
-    navigator.userAgentData.getHighEntropyValues(['manufacturer','model','platformVersion'])
-      .then(hints => {
-        const hintModel  = hints.model        || null;
-        const hintMaker  = hints.manufacturer  || null;
-        const { maker: uaMaker, model: uaModel } = getMakerModel();
-        renderMakerModel(hintMaker || uaMaker, hintModel || uaModel);
-      })
-      .catch(() => {
-        // Client Hints failed — fall back to UA string
-        const { maker, model } = getMakerModel();
-        renderMakerModel(maker, model);
-      });
-  } else {
-    // Older browser — use UA string only
-    const { maker, model } = getMakerModel();
-    renderMakerModel(maker, model);
-  }
-
-  const androidVer = getAndroidVersion();
-
-  // Android version with badge
-  const androidEl = document.getElementById('val-android');
-  if (androidVer) {
-    const major = androidVer.split('.')[0];
-    const name = androidNames[major] || 'Android ' + androidVer;
+  // ── Render Android version ────────────────────────────────────────
+  function renderAndroidVersion(versionString) {
+    const androidEl = document.getElementById('val-android');
+    androidEl.innerHTML = ''; // clear placeholder
+    if (!versionString) {
+      const el = document.createElement('span');
+      el.className = 'info-value unknown';
+      el.textContent = 'Kein Android erkannt (evtl. iOS oder PC)';
+      androidEl.appendChild(el);
+      return;
+    }
+    const major = versionString.split('.')[0];
+    const name = androidNames[major] || 'Android ' + versionString;
     const badge = document.createElement('span');
     badge.className = 'badge' + (parseInt(major) < 10 ? ' warning' : '');
     badge.textContent = name;
     androidEl.appendChild(badge);
     window._deviceContext.android = name;
 
-    // Show update tip
     const tipCard = document.getElementById('update-card');
     const tip = document.getElementById('update-tip');
     tipCard.style.display = 'block';
-    if (parseInt(major) >= 13) {
+    if (parseInt(major) >= 15) {
       tip.innerHTML = '✅ Ihr Android ist <strong>aktuell und sicher</strong>. Gut gemacht!';
     } else if (parseInt(major) >= 10) {
       tip.innerHTML = '⚠️ Ihre Android-Version ist etwas älter. Prüfen Sie unter <strong>Einstellungen → System → Software-Update</strong>, ob ein Update verfügbar ist.';
     } else {
       tip.innerHTML = '🔴 Ihre Android-Version ist <strong>sehr alt</strong> und erhält möglicherweise keine Sicherheitsupdates mehr. Sprechen Sie mit jemandem, der Ihnen beim Umstieg auf ein neueres Gerät helfen kann.';
     }
+  }
+
+  // Try modern Client Hints API first (Chrome 90+ on Android)
+  // platformVersion gives the real Android version; UA string freezes it at "10"
+  if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+    navigator.userAgentData.getHighEntropyValues(['manufacturer', 'model', 'platformVersion'])
+      .then(hints => {
+        const hintModel   = hints.model          || null;
+        const hintMaker   = hints.manufacturer   || null;
+        const hintVersion = hints.platformVersion || null;
+        const { maker: uaMaker, model: uaModel } = getMakerModel();
+        renderMakerModel(hintMaker || uaMaker, hintModel || uaModel);
+        // Use Client Hints version if available, otherwise fall back to UA string
+        renderAndroidVersion(hintVersion || getAndroidVersion());
+      })
+      .catch(() => {
+        const { maker, model } = getMakerModel();
+        renderMakerModel(maker, model);
+        renderAndroidVersion(getAndroidVersion());
+      });
   } else {
-    const noAndroid = document.createElement('span');
-    noAndroid.className = 'info-value unknown';
-    noAndroid.textContent = 'Kein Android erkannt (evtl. iOS oder PC)';
-    androidEl.appendChild(noAndroid);
+    const { maker, model } = getMakerModel();
+    renderMakerModel(maker, model);
+    renderAndroidVersion(getAndroidVersion());
   }
   // ── AI Assistant ──────────────────────────────────────────────────
 

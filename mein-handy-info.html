@@ -663,14 +663,7 @@
       ? `Mein Smartphone: ${deviceStr}.\n\n`
       : '';
 
-    const hints = `Wichtige Hinweise:
-- Google Play Store: Kein Suchfeld sichtbar beim Öffnen — zuerst unten auf das Lupen-Symbol 🔍 tippen.
-- Play Store Suchergebnisse: Die ersten Treffer sind oft Werbung ("Gesponsert"). Immer etwas nach unten scrollen und App-Name sowie Symbol prüfen.
-- Notruf / SOS: Unter Einstellungen → Sicherheit und Notfall (oder "Notfall" je nach Hersteller) gibt es eine Option "Notfall-SOS". Dort kann man wählen zwischen: Einschalttaste 5 Sekunden gedrückt halten, ODER Einschalttaste 5-mal schnell drücken. Beide Methoden können je nach Gerät aktiviert oder deaktiviert werden.
-
-`;
-
-    return `${context}${hints}Bitte erkläre mir auf Deutsch, Schritt für Schritt und in einfacher Sprache (ich bin Anfänger): ${question}`;
+    return `${context}Bitte erkläre mir auf Deutsch, Schritt für Schritt und in einfacher Sprache (ich bin Anfänger): ${question}`;
   }
 
   // Open the chosen AI service with the prompt pre-filled

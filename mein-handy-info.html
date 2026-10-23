@@ -184,12 +184,14 @@
 
     .ai-buttons {
       display: flex;
+      flex-wrap: wrap;
       gap: 10px;
       margin-top: 12px;
     }
 
     .ai-btn {
-      flex: 1;
+      flex: 1 1 calc(50% - 5px);
+      min-width: 140px;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -338,7 +340,14 @@
       <span class="ai-btn-icon">🔵</span>
       <span>
         <strong>Mit Gemini fragen</strong><br>
-        <small>Google-Konto empfohlen</small>
+        <small>Frage wird kopiert</small>
+      </span>
+    </button>
+    <button class="ai-btn chatgpt-btn" onclick="openAI('chatgpt')" title="Mit ChatGPT fragen">
+      <span class="ai-btn-icon">🤖</span>
+      <span>
+        <strong>Mit ChatGPT fragen</strong><br>
+        <small>Frage wird kopiert</small>
       </span>
     </button>
     <button class="ai-btn duck-btn" onclick="openAI('duck')" title="Mit duck.ai fragen">
@@ -348,6 +357,9 @@
         <small>Kein Konto nötig</small>
       </span>
     </button>
+  </div>
+
+  <div id="clipboard-msg" style="display:none; margin-top:12px; background:#E8F5E9; border-left:4px solid #2E7D32; border-radius:12px; padding:12px 16px; font-size:0.9rem; color:#1A1A1A; line-height:1.6;">
   </div>
 </div>
 
@@ -670,23 +682,52 @@
     return `${context}Bitte erkläre mir auf Deutsch, Schritt für Schritt und in einfacher Sprache (ich bin Anfänger): ${question}`;
   }
 
-  // Open the chosen AI service with the prompt pre-filled
+  // Open the chosen AI service
   window.openAI = function(service) {
     const input = document.getElementById('ask-input');
     const question = input.value.trim();
-    if (!question) { input.focus(); input.style.borderColor = 'red'; return; }
+    if (!question) {
+      input.focus();
+      input.style.borderColor = 'red';
+      setTimeout(() => { input.style.borderColor = ''; }, 2000);
+      return;
+    }
     input.style.borderColor = '';
 
     const prompt = buildPrompt(question);
-    const encoded = encodeURIComponent(prompt);
+    const msg = document.getElementById('clipboard-msg');
 
-    let url;
-    if (service === 'gemini') {
-      url = `https://gemini.google.com/app?q=${encoded}`;
-    } else {
-      url = `https://duck.ai/?q=${encoded}`;
+    if (service === 'duck') {
+      // duck.ai supports URL pre-fill reliably — just open it
+      window.open(`https://duck.ai/?q=${encodeURIComponent(prompt)}`, '_blank');
+      msg.style.display = 'none';
+      return;
     }
-    window.open(url, '_blank');
+
+    // For Gemini and ChatGPT: copy prompt to clipboard, then open the service
+    const urls = {
+      gemini:  'https://gemini.google.com/app',
+      chatgpt: 'https://chatgpt.com/',
+    };
+    const names = {
+      gemini:  'Gemini',
+      chatgpt: 'ChatGPT',
+    };
+
+    navigator.clipboard.writeText(prompt)
+      .then(() => {
+        msg.style.display = 'block';
+        msg.innerHTML = `✅ <strong>Frage kopiert!</strong> ${names[service]} wird geöffnet.<br>
+          Tippen Sie im Textfeld auf <strong>Einfügen</strong> (langer Druck), um Ihre Frage einzufügen, und dann auf Senden.`;
+        window.open(urls[service], '_blank');
+      })
+      .catch(() => {
+        // Clipboard failed — show the prompt text so user can copy manually
+        msg.style.display = 'block';
+        msg.innerHTML = `⚠️ Automatisches Kopieren nicht möglich. Bitte kopieren Sie diese Frage manuell und fügen Sie sie in ${names[service]} ein:<br><br>
+          <span style="background:#fff;border:1px solid #ccc;border-radius:8px;padding:8px 10px;display:block;font-size:0.85rem;word-break:break-word;">${prompt.replace(/</g,'&lt;')}</span>`;
+        window.open(urls[service], '_blank');
+      });
   };
 
 })();
